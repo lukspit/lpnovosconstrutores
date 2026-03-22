@@ -28,6 +28,21 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
+/* Typewriter word */
+#hw-typed {
+  transition: opacity 0.4s ease;
+}
+#hw-typed.is-typing::after {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 0.82em;
+  background: currentColor;
+  vertical-align: middle;
+  margin-left: 3px;
+  animation: blink 0.65s step-end infinite;
+}
+
 /* Dot grid */
 .dot-grid {
   background-image: radial-gradient(circle, #1C1B1B 1px, transparent 1px);
@@ -172,7 +187,7 @@ html { scroll-behavior: smooth; }
 
     <!-- Headline -->
     <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-0.03em;line-height:1.0;color:#F5F0EB;margin:0 0 28px;font-size:clamp(2.8rem,9vw,7rem);">
-      Pare de <span id="typeword" style="color:#D97757;">construir</span><span id="typecursor" style="display:inline-block;width:4px;height:0.85em;background:#D97757;margin-left:3px;vertical-align:middle;animation:blink 0.7s step-end infinite;opacity:0;"></span> sozinho.
+      Pare de <span style="display:inline-grid;vertical-align:baseline;"><span style="grid-area:1/1;opacity:0;pointer-events:none;white-space:nowrap;user-select:none;">vibe codar</span><span id="hw-typed" style="grid-area:1/1;white-space:nowrap;color:#F5F0EB;">construir</span></span> sozinho.
     </h1>
 
     <!-- Sub -->
@@ -328,72 +343,53 @@ html { scroll-behavior: smooth; }
 
 <script>
 (function() {
-  const words = ["construir", "vibe codar"];
-  const el = document.getElementById("typeword");
-  const cursor = document.getElementById("typecursor");
+  const words  = ["construir", "vibe codar"];
+  const colors = ["#F5F0EB",   "#D97757"];
+  const typed  = document.getElementById("hw-typed");
 
-  // "construir" = neutral color (inherit), "vibe codar" = orange
-  const colors = ["#F5F0EB", "#D97757"];
+  const TYPE_MS    = 90;
+  const FADE_MS    = 420;
+  const PAUSE_SHOW = 2200;
+  const PAUSE_PRE  = 500;  // cursor visible before fade starts
 
-  let wordIndex = 0;       // start on "construir"
-  let charIndex = words[0].length; // start fully written
-  let isDeleting = false;
-  let isPausing = false;
+  let wi = 0; // "construir" is already rendered in HTML
 
-  const PAUSE_AFTER_WRITE = 2200;
-  const PAUSE_AFTER_DELETE = 400;
-  const TYPE_SPEED = 90;
-  const DELETE_SPEED = 55;
-
-  function tick() {
-    const current = words[wordIndex];
-    const next = words[(wordIndex + 1) % words.length];
-
-    if (isPausing) return;
-
-    if (!isDeleting) {
-      // typing
-      charIndex++;
-      el.textContent = current.slice(0, charIndex);
-      if (charIndex === current.length) {
-        // fully written — pause then start deleting
-        isPausing = true;
-        cursor.style.opacity = "0";
-        setTimeout(() => {
-          isPausing = false;
-          isDeleting = true;
-          cursor.style.opacity = "1";
-          tick();
-        }, PAUSE_AFTER_WRITE);
-        return;
-      }
-    } else {
-      // deleting
-      charIndex--;
-      el.textContent = current.slice(0, charIndex);
-      if (charIndex === 0) {
-        // fully deleted — switch word then pause briefly
-        isDeleting = false;
-        wordIndex = (wordIndex + 1) % words.length;
-        el.style.color = colors[wordIndex];
-        isPausing = true;
-        setTimeout(() => {
-          isPausing = false;
-          tick();
-        }, PAUSE_AFTER_DELETE);
-        return;
-      }
-    }
-
-    setTimeout(tick, isDeleting ? DELETE_SPEED : TYPE_SPEED);
+  function fadeOut(then) {
+    typed.style.opacity = "0";
+    setTimeout(() => { typed.classList.remove("is-typing"); then(); }, FADE_MS);
   }
 
-  // Start after 2s so user reads the headline first
+  function typeWord() {
+    let ci = 0;
+    typed.textContent = "";
+    typed.style.color = colors[wi];
+    typed.style.opacity = "1";
+    typed.classList.add("is-typing");
+
+    function next() {
+      ci++;
+      typed.textContent = words[wi].slice(0, ci);
+      if (ci === words[wi].length) {
+        // Word complete — cursor keeps blinking during pause, then fade and switch
+        setTimeout(() => {
+          wi = (wi + 1) % words.length;
+          fadeOut(typeWord);
+        }, PAUSE_SHOW);
+        return;
+      }
+      setTimeout(next, TYPE_MS);
+    }
+    next();
+  }
+
+  // Start: "construir" already shown. After 2.5s, cursor appears then cycle begins.
   setTimeout(() => {
-    cursor.style.opacity = "1";
-    isDeleting = true;  // first action: delete "construir" to reveal the cycle
-    tick();
-  }, 2000);
+    typed.classList.add("is-typing");
+    setTimeout(() => {
+      wi = 1; // next: "vibe codar"
+      fadeOut(typeWord);
+    }, PAUSE_PRE);
+  }, 2500);
 })();
 </script>
 </body>
