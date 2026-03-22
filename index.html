@@ -187,7 +187,7 @@ html { scroll-behavior: smooth; }
 
     <!-- Headline -->
     <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-0.03em;line-height:1.0;color:#F5F0EB;margin:0 0 28px;font-size:clamp(2.8rem,9vw,7rem);">
-      Pare de <span style="display:inline-grid;vertical-align:baseline;"><span style="grid-area:1/1;opacity:0;pointer-events:none;white-space:nowrap;user-select:none;">vibe codar</span><span id="hw-typed" style="grid-area:1/1;white-space:nowrap;color:#F5F0EB;">construir</span></span> sozinho.
+      Pare de <span style="display:inline-grid;vertical-align:baseline;"><span style="grid-area:1/1;opacity:0;pointer-events:none;white-space:nowrap;user-select:none;">vibe codar</span><span id="hw-typed" class="is-typing" style="grid-area:1/1;white-space:nowrap;color:#F5F0EB;">construir</span></span> sozinho.
     </h1>
 
     <!-- Sub -->
@@ -382,13 +382,10 @@ html { scroll-behavior: smooth; }
     next();
   }
 
-  // Start: "construir" already shown. After 2.5s, cursor appears then cycle begins.
+  // Start: "construir" already shown with cursor. After 2.5s, cycle begins.
   setTimeout(() => {
-    typed.classList.add("is-typing");
-    setTimeout(() => {
-      wi = 1; // next: "vibe codar"
-      fadeOut(typeWord);
-    }, PAUSE_PRE);
+    wi = 1; // next: "vibe codar"
+    fadeOut(typeWord);
   }, 2500);
 })();
 </script>
