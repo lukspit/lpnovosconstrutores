@@ -172,7 +172,7 @@ html { scroll-behavior: smooth; }
 
     <!-- Headline -->
     <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:900;text-transform:uppercase;letter-spacing:-0.03em;line-height:1.0;color:#F5F0EB;margin:0 0 28px;font-size:clamp(2.8rem,9vw,7rem);">
-      Pare de construir sozinho.
+      Pare de <span id="typeword" style="color:#D97757;">construir</span><span id="typecursor" style="display:inline-block;width:4px;height:0.85em;background:#D97757;margin-left:3px;vertical-align:middle;animation:blink 0.7s step-end infinite;opacity:0;"></span> sozinho.
     </h1>
 
     <!-- Sub -->
@@ -326,5 +326,75 @@ html { scroll-behavior: smooth; }
   }
 </style>
 
+<script>
+(function() {
+  const words = ["construir", "vibe codar"];
+  const el = document.getElementById("typeword");
+  const cursor = document.getElementById("typecursor");
+
+  // "construir" = neutral color (inherit), "vibe codar" = orange
+  const colors = ["#F5F0EB", "#D97757"];
+
+  let wordIndex = 0;       // start on "construir"
+  let charIndex = words[0].length; // start fully written
+  let isDeleting = false;
+  let isPausing = false;
+
+  const PAUSE_AFTER_WRITE = 2200;
+  const PAUSE_AFTER_DELETE = 400;
+  const TYPE_SPEED = 90;
+  const DELETE_SPEED = 55;
+
+  function tick() {
+    const current = words[wordIndex];
+    const next = words[(wordIndex + 1) % words.length];
+
+    if (isPausing) return;
+
+    if (!isDeleting) {
+      // typing
+      charIndex++;
+      el.textContent = current.slice(0, charIndex);
+      if (charIndex === current.length) {
+        // fully written — pause then start deleting
+        isPausing = true;
+        cursor.style.opacity = "0";
+        setTimeout(() => {
+          isPausing = false;
+          isDeleting = true;
+          cursor.style.opacity = "1";
+          tick();
+        }, PAUSE_AFTER_WRITE);
+        return;
+      }
+    } else {
+      // deleting
+      charIndex--;
+      el.textContent = current.slice(0, charIndex);
+      if (charIndex === 0) {
+        // fully deleted — switch word then pause briefly
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % words.length;
+        el.style.color = colors[wordIndex];
+        isPausing = true;
+        setTimeout(() => {
+          isPausing = false;
+          tick();
+        }, PAUSE_AFTER_DELETE);
+        return;
+      }
+    }
+
+    setTimeout(tick, isDeleting ? DELETE_SPEED : TYPE_SPEED);
+  }
+
+  // Start after 2s so user reads the headline first
+  setTimeout(() => {
+    cursor.style.opacity = "1";
+    isDeleting = true;  // first action: delete "construir" to reveal the cycle
+    tick();
+  }, 2000);
+})();
+</script>
 </body>
 </html>
